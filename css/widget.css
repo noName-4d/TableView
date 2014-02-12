@@ -1,0 +1,82 @@
+/* HTML */
+
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+table thead,
+table tbody,
+table tfoot,
+table tr,
+table th,
+table td {
+  border-width: 0;
+  border-style: inherit;
+  border-color: inherit;
+}
+
+/* THEME */
+
+table.waf-tableview {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #cccccc;
+  width: 100%;
+  height: 100%;
+  font-family: "Helvetica Neue", helvetica, "Myriad Pro", Myriad, sans-serif;
+  font-size: 14px;
+}
+
+table.waf-tableview thead th,
+table.waf-tableview tfoot td {
+  border-width: 1px;
+  border-color: #777777;
+  background-color: #979797;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset;
+  color: #fff;
+  cursor: pointer;
+}
+
+table.waf-tableview tr + tr {
+  border-top-width: 1px;
+}
+
+table.waf-tableview th,
+table.waf-tableview td {
+  padding: 14px;
+  text-align: center;
+  border-width: 1px;
+}
+
+
+table.waf-tableview tr.selected {
+  background-color:#009fc7;
+}
+
+table .waf-state-loading .waf-skin-spinner {
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+  width: 3em;
+  height: 3em;
+  font-size: 14px;
+  -webkit-animation: waf-kf-spin 1.3s infinite alternate;
+  animation: waf-kf-spin 1.3s infinite alternate;
+  border-width: 0.3em;
+  border-style: solid;
+  border-color: #48bad6 #48bad6 rgba(0, 0, 0, 0.05) rgba(0, 0, 0, 0.05);
+  border-radius: 1000px;
+  display:block;
+}
+@-webkit-keyframes waf-kf-spin {
+  to {
+    -webkit-transform: rotate(2turn);
+    transform: rotate(2turn);
+  }
+}
+@keyframes waf-kf-spin {
+  to {
+    -webkit-transform: rotate(2turn);
+    transform: rotate(2turn);
+  }
+}

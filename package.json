@@ -1,0 +1,23 @@
+{
+    "name": "TableView",
+    "author": "Widget Developer",
+	"contributors": [
+	    "Developer 1", 
+	    "Developer 2"
+	],
+    "version": "1.0.0",
+    "copyright": "(c) 2013 Widget Developer",
+	"repository": {
+	    "type": "git",
+	    "url": "https://github.com/developer/Widget.git"
+	},
+	"keywords": ["wakanda", "widget"],
+	"engines": {"wakanda" : ">= 6"},
+	"license": "MIT", 
+    "loadDependencies": [
+    	{"id": "Widget_V2"},
+        {"id": "TableView/widget.js", "version": "1.0.0", "path": "WIDGETS_CUSTOM"},
+        {"id": "TableView/css/widget.css", "version": "1.0.0", "path": "WIDGETS_CUSTOM"},
+        {"id": "TableView/designer.js", "studioOnly": true, "version": "1.0.0", "path": "WIDGETS_CUSTOM"}
+    ]
+}
