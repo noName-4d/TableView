@@ -1,4 +1,4 @@
-WAF.define('TableView', ['waf-core/widget', 'waf-behavior/source-navigation'], function(widget, navigation) {
+WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 	var TableView = widget.create('TableView', undefined, {
 		tagName: 'div',
@@ -12,23 +12,157 @@ WAF.define('TableView', ['waf-core/widget', 'waf-behavior/source-navigation'], f
 			type: 'datasource'
 		}),
 		
+		start: widget.property({
+			defaultValue: 0,
+			type: 'integer'
+		}),
+
+
+		currentPage: widget.property({
+			defaultValue: 1,
+			type: 'integer'
+		}),
+
+
+		pageSize: widget.property({
+			defaultValue: 20,
+			type: 'integer'
+		}),
+
+
+		nbPage: widget.property({
+			type: 'integer'
+		}),
+
+
+		navigationMode: widget.property({
+			defaultValue: 'pagination',
+			'enum': ['loadmore', 'pagination']
+		}),
+		
+		
 		
 		init: function() {
 			this._buildHTMLStructure();
 			this.render();
+			this._initTmpBehavior();
 			this._bindPropertyEvent();
 			this._bindEvent();
 		},
+		
+		
+		_initTmpBehavior: function() {
+	
+			var source;
+			this._initDsEvent();
+			this._defaultStep = this.pageSize();
+			source = this.getNavigationSource();
+			if (source()) {
+				this._pagin = new Paginator({ref: this});
+				this._sorter = new TableSorter({ref: this});
+			}
+			
+			
+			source.onChange(function() {
+				if (this._dsCollChgSubscriber && this._dsCollChgSubscriber.unsubscribe) {
+					this._dsCollChgSubscriber.unsubscribe();
+				}
+				
+				if (this._dsCurrEltSubscriber && this._dsCurrEltSubscriber.unsubscribe) {
+					this._dsCurrEltSubscriber.unsubscribe();
+				}
+				
+				this.renderElements();
+				this._initDsEvent();
+				if (!this._pagin) {
+					this._pagin = new Paginator({ref: this});
+				}
+			});
 
+
+			this._startSubscriber = this.start.onChange(function(val) {
+				var modulo, pageSize, page, navigationType;
+				
+				pageSize = this.pageSize();
+				navigationType = this.navigationMode();
+				
+				if (navigationType === 'pagination') {
+					modulo = val % pageSize;
+					page = Math.ceil(val / pageSize);
+					
+					if (modulo !== 0) {
+						this._startSubscriber.pause();
+						this.start((page - 1) * pageSize);
+						this._startSubscriber.resume();
+					} else {
+						++page;
+					}
+					
+					this._currentPageSubscriber.pause();
+					this.currentPage(page);
+					this._currentPageSubscriber.resume();
+				}
+				
+				
+				this.generateElements(this.start(), this.pageSize(), function(fragment) {
+					var container = this._getNavigationContainer();
+					container.innerHTML = '';
+					container.insertAdjacentHTML('beforeend', fragment);
+				}.bind(this));
+			});
+
+
+			this._currentPageSubscriber = this.currentPage.onChange(function(val) {
+				var start = ((val - 1) * this.pageSize());
+				this._startSubscriber.pause();
+				this.start(start);
+				this._startSubscriber.resume();
+				
+				this.generateElements(this.start(), this.pageSize(), function(fragment) {
+					var container = this._getNavigationContainer();
+					container.innerHTML = '';
+					container.insertAdjacentHTML('beforeend', fragment);
+				}.bind(this));
+			});
+			
+			
+			this._pageSizeSubscriber = this.pageSize.onChange(function(val, oldVal) {
+				
+				var length, start, sourceProperty, source;
+				oldVal = oldVal || 0;
+				
+				sourceProperty = this.getNavigationSource();
+				source = sourceProperty();
+
+				if (val < oldVal) {
+					length = val;
+					start = this.start();
+				} else {
+					length = val - oldVal;
+					start = this.start() + oldVal;
+				}
+				
+				this.nbPage(Math.ceil(source.length / val));
+				
+				var fn = function(fragment) {
+					var container = this._getNavigationContainer();
+					if (val < oldVal) {
+						container.innerHTML = '';
+					}
+					
+					container.insertAdjacentHTML('beforeend', fragment);
+					
+				}.bind(this);
+
+				this.generateElements(start, length, fn);
+			});
+		},
 
 		_bindEvent: function() {
 			this.subscribe('beforeFetch',this.appendLoader.bind(this));
 			this.subscribe('afterFetch', this.removeLoader.bind(this));
 
 			if (this.rows()) {
-				
-				this._pagin = new Paginator({ref: this});
-				
 				this.rows().subscribe('currentElementChange', function(e) {
 					var pos = e.data.dataSource.getPosition();
 					this.select(pos);
@@ -315,12 +449,164 @@ WAF.define('TableView', ['waf-core/widget', 'waf-behavior/source-navigation'], f
 				label: 'new cols',
 				attribute: 'lastName'
 			});
+		},
+		
+		//============ behavior =============//
+		
+		_initDsEvent: function() {
+			var sourceProperty = this.getNavigationSource();
+			var source = sourceProperty();
+			if (source) {
+				this._dsCurrEltSubscriber = source.subscribe('currentElementChange', function(e) {
+					var diff, navigationType, pos, start, pageSize, page, modulo;
+
+					navigationType = this.navigationMode();
+					pos = e.data.dataSource.getPosition();
+
+					start = this.start();
+					pageSize = this.pageSize();
+
+					if (navigationType === 'loadmore') {
+						if (pos < start || pos > (start + pageSize - 1)) {
+							if (start > pos && pos >= 0) {
+								diff = start - pos;
+
+								this._pageSizeSubscriber.pause();
+								this.pageSize(pageSize + diff);
+								this._pageSizeSubscriber.resume();
+
+								this.start(pos);
+							}
+
+							if (pos > (start + pageSize - 1)) {
+								diff = pos - (start + pageSize);
+								this.pageSize(pageSize + diff + 1);
+							}
+						}
+					} else if (navigationType === 'pagination') {
+						modulo = pos % pageSize;
+						page = Math.ceil(pos / pageSize);
+
+						if (modulo !== 0 && page > 0) {
+							--page;
+						}
+						
+						this.start(page * pageSize);
+					}
+				}.bind(this));
+
+
+				this._dsCollChgSubscriber = source.subscribe('collectionChange', function() {
+					this.nbPage(Math.ceil(source.length / this.pageSize()));
+					this.renderElements();
+				}.bind(this));
+				
+				this.nbPage(Math.ceil(source.length / this.pageSize()));
+			}
+		},
+
+
+		renderElements: function() {
+			this.generateElements(this.start(), this.pageSize(), function(fragment) {
+				this._getNavigationContainer().innerHTML = '';
+				this._getNavigationContainer().insertAdjacentHTML('beforeend', fragment);
+			}.bind(this));
+		},
+
+
+		generateElements: function(from, limit, fn) {
+			var sourceProperty, frag, that, source;
+			
+			sourceProperty = this.getNavigationSource();
+			source = sourceProperty();
+
+			if (!source || source.length === 0) {
+				return false;
+			}
+
+			that = this;
+			frag = '';
+			
+
+			if (!this._rowsCount) {
+				this._rowsCount = 0;
+			}
+
+			this.fire('beforeFetch', {from: from, limit: limit});
+
+			source.getElements(from, limit, {
+				onSuccess: function(result) {
+					
+					var element, elements, i, startPos;
+					startPos = result.position;
+					elements = result.elements;
+
+					for (i = 0; i < elements.length; i++) {
+						if (elements[i]) {
+							element = that.renderElement(elements[i], (startPos + i));
+							frag += element;
+						}
+					}
+
+					if (that.navigationMode() === 'loadmore') {
+						that._rowsCount += elements.length;
+					} else {
+						that._rowsCount = elements.length;
+					}
+
+					that.fire('afterFetch', {
+						numRowsAdded: elements.length,
+						totalRows: that._rowsCount,			
+						dataSource: source
+					});
+					
+					if (fn) {
+						fn(frag);
+					}
+				},
+				
+				onError: function() {
+					that.fire('fetchFailed');
+				}
+			});	
+		},
+		
+		
+		_getNavigationContainer: function() {
+			var container = this.getNavigationContainer();
+			if (container instanceof jQuery) {
+				return container.get(0);
+			} else {
+				if (container && container.nodeType) {
+					return container;
+				} else {
+					throw 'You have to return an html or jquery element';
+				}
+			}
+		},
+
+
+		nextPage: function() {
+			if (this.currentPage() < this.nbPage()) {
+				this.currentPage(this.currentPage() + 1);
+			}
+		},
+
+
+		prevPage: function() {
+			if (this.currentPage() > 1) {
+				this.currentPage(this.currentPage() - 1);
+			}
+		},
+
+
+		loadMore: function() {
+			this.pageSize(this.pageSize() + this._defaultStep);
 		}
 	
 	});
 	
-	TableView.inherit(navigation);
-	
+	//============= pagination ============//
 	
 	var Paginator = widget.create('Paginator', undefined, {
 		tagName: 'span',
@@ -486,7 +772,90 @@ WAF.define('TableView', ['waf-core/widget', 'waf-behavior/source-navigation'], f
 		}
 	});
 	
+	var TableSorter = widget.create('TableSorter', undefined, {
+		init: function(option) {
+			this.ref = option.ref;
+			if (!this.ref) {
+				return false;
+			}
+
+			this.activeField = {};
+			this.source = this.ref.getNavigationSource();
+			this.buildMaps();
+			this.bindEvent();
+		},
+
+
+		buildMaps: function() {
+			var i, cols = this.ref.cols();
+			
+			this.mapLabel = {};
+			this.mapIndex = {};
+			this.mapField = {};
+			
+			for(i = 0; i < cols.length; i++) {
+				this.mapLabel[cols[i].label] = cols[i].attribute;
+				this.mapIndex[i] = cols[i].attribute;
+				this.mapField[cols[i].attribute] = cols[i].label;
+			}
+		},
+
+
+		bindEvent: function() {
+			var cols, i, th, head = this.ref.getHeader();
+			
+			cols = head.querySelectorAll('th');
+			for (i = 0; i < cols.length; i++) {
+				th = cols.item(i);
+				
+				th.addEventListener('click', (function(index){
+					return this.sortByColumnIndex.bind(this, index);
+				}.bind(this))(i), false);
+			}
+		},
+
+	
+		sortByColumnName: function(name, order) {
+			var field = this.mapLabel[name];
+			if (field) {
+				this.sortByDsField(field, order);
+			}
+		},
+
+
+		sortByColumnIndex: function(index, order) {
+			var field = this.mapIndex[index];
+			if (field) {
+				this.sortByDsField(field, order);
+			}
+		},
+		
+		
+		sortByDsField: function(field, order) {
+			var source = this.source();
+			
+			if (this.activeField.name === field) {
+				if (order === 'asc' || order === 'desc') {
+					if (order === this.activeField.sort) {
+						return false;
+					}
+					this.activeField.sort = order;
+				} else {
+					if (this.activeField.sort === 'asc') {
+						this.activeField.sort = 'desc';
+					} else {
+						this.activeField.sort = 'asc';
+					}
+				}
+			} else {
+				this.activeField.name = field;
+				this.activeField.sort = (order === 'asc' || order === 'desc')? order : 'desc';
+			}
+			
+			source.orderBy(this.activeField.name + ' ' + this.activeField.sort);
+		}
+	});
+	
 	
 	return TableView;
 });
-
