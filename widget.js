@@ -756,7 +756,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 			}.bind(this), false);
 
 			txt.type = 'text';
-			txt.style.width = '20px';
+			txt.className = 'paginationText';
 			txt.value = currPage;
 
 			f.appendChild(lArrow);

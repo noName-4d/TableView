@@ -80,3 +80,9 @@ table .waf-state-loading .waf-skin-spinner {
     transform: rotate(2turn);
   }
 }
+
+table.waf-tableview .paginationText {
+	width: 35px;
+	text-align: right;
+	
+}
