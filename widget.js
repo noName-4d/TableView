@@ -211,9 +211,9 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 				
 				
 		_buildHTMLStructure: function() {
-			
+			this.node.innerHTML = '';
 			this._node = document.createElement('table');
-			this._node.className = 'waf-tableview';
+			this._node.className = 'waf-tableview waf-ui-box';
 			this.node.appendChild(this._node);
 		},
 
@@ -252,6 +252,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 			columns = this.cols();
 			f = this._getFragment();
 			thead = document.createElement('thead');
+			thead.className = 'waf-ui-header';
 			tr = document.createElement('tr');
 
 			for (i = 0, l = columns.length; i < l; i++) {
@@ -291,7 +292,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 			f = this._getFragment();
 			tbody = document.createElement('tbody');
-
+			tbody.className = 'waf-ui-body';
 			tbody.addEventListener('click', this.selectLine.bind(this), false);
 			f.appendChild(tbody);
 		},
@@ -320,6 +321,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 		buildFooter: function() {
 			var tfoot, f = this._getFragment();
 			tfoot = document.createElement('tfoot');
+			tfoot.className = 'waf-ui-footer';
 			f.appendChild(tfoot);
 
 			if (!this.rows()) {

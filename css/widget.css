@@ -1,15 +1,15 @@
 /* HTML */
 
-table {
+.waf-tableview table {
   border-spacing: 0;
   border-collapse: collapse;
 }
-table thead,
-table tbody,
-table tfoot,
-table tr,
-table th,
-table td {
+.waf-tableview table thead,
+.waf-tableview table tbody,
+.waf-tableview table tfoot,
+.waf-tableview table tr,
+.waf-tableview table th,
+.waf-tableview table td {
   border-width: 0;
   border-style: inherit;
   border-color: inherit;
@@ -17,7 +17,7 @@ table td {
 
 /* THEME */
 
-table.waf-tableview {
+.waf-tableview table {
   border-width: 1px;
   border-style: solid;
   border-color: #cccccc;
@@ -27,33 +27,29 @@ table.waf-tableview {
   font-size: 14px;
 }
 
-table.waf-tableview thead th,
-table.waf-tableview tfoot td {
+.waf-tableview table thead th,
+.waf-tableview table tfoot td {
   border-width: 1px;
-  border-color: #777777;
-  background-color: #979797;
-  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset;
-  color: #fff;
   cursor: pointer;
 }
 
-table.waf-tableview tr + tr {
+.waf-tableview table tr + tr {
   border-top-width: 1px;
 }
 
-table.waf-tableview th,
-table.waf-tableview td {
+.waf-tableview table th,
+.waf-tableview table td {
   padding: 14px;
   text-align: center;
   border-width: 1px;
 }
 
 
-table.waf-tableview tr.selected {
+.waf-tableview table tr.selected {
   background-color:#009fc7;
 }
 
-table .waf-state-loading .waf-skin-spinner {
+.waf-tableview table .waf-state-loading .waf-skin-spinner {
   margin: auto;
   position: relative;
   overflow: hidden;
@@ -82,7 +78,7 @@ table .waf-state-loading .waf-skin-spinner {
 }
 
 table.waf-tableview .paginationText {
-	width: 40px;
+	width: 35px;
 	text-align: right;
 	
 }
