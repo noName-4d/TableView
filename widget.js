@@ -41,8 +41,14 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 		}),
 		
 		
+		editMode: widget.property({
+			type: 'boolean',
+			defaultValue: false
+		}),
+		
 		
 		init: function() {
+			this._buildEditCellText();
 			this._buildHTMLStructure();
 			this.render();
 			this._initTmpBehavior();
@@ -218,6 +224,18 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 		},
 
 
+		_buildEditCellText: function() {
+			var txt;
+			this._editCellText = txt = document.createElement('input');
+			txt.type = 'text';
+			txt.style.height = '100%';
+			txt.style.width = '100%';
+            
+			txt.addEventListener('blur', this.updateDsFromText.bind(this));
+			txt.addEventListener('keypress', this.escapeFromText.bind(this));
+		},
+
+
 		render: function() {
 			this.buildHeader();
 			this.buildBody();
@@ -263,6 +281,90 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 			thead.appendChild(tr);
 			f.appendChild(thead);
 		},
+		
+		
+		handleDblclick: function(ev) {
+			var that, target, tr, attribute, txt, td;
+			
+			if (this.editMode() === false) {
+				return false;
+			}
+			
+			that = this;
+			target = ev.target;
+			tr = target.parentElement;
+			attribute = target.dataset['attribute'];
+			
+			
+			
+			if (target.tagName !== 'TD') {
+				return false;
+			}
+			
+			
+			var id = tr.id.replace('tr_', '');
+
+			this.rows().getElement(id, {
+				onSuccess: function(dsEvent) {
+					var value = dsEvent.element[attribute];
+					
+					that._focusEntity = dsEvent.element._private.currentEntity;
+					that._editCellText.value = value;
+					that._editValue = value;
+					if (target.firstChild) {
+						target.replaceChild(that._editCellText, target.firstChild);
+					} else {
+						target.appendChild(that._editCellText);
+					}
+					
+					setTimeout(function() {
+						that._editCellText.focus();
+					}, 0);
+					
+					
+					that._tdFocus = target;
+					
+					setTimeout(function() {
+						target.focus();
+					}, 0);
+				}
+			});
+		},
+		
+		
+		updateDsFromText: function(ev) {
+			
+			var attr, tdItm, txtItm, oldValue, val;
+			
+			val = this._editCellText.value;
+
+			tdItm = this._tdFocus;
+			txtItm = this._editCellText;
+			
+			attr = this._tdFocus.dataset['attribute'];
+			oldValue = this._focusEntity[attr].getValue();
+			
+			if (oldValue !== val) {
+				this._focusEntity[attr].setValue(val);
+				this._focusEntity.save({
+					onSuccess: function() {
+						tdItm.replaceChild(document.createTextNode(val), txtItm);
+					},
+					onError: function() {
+						tdItm.replaceChild(document.createTextNode(oldValue), txtItm);
+					}
+				});
+			} else {
+				tdItm.replaceChild(document.createTextNode(val), txtItm);
+			}
+		},
+
+
+		escapeFromText: function(ev) {
+			if (ev && ev.keyCode && ev.keyCode === 13) {
+				$(this._editCellText).trigger('blur');
+			}
+		},
 
 
 		select: function(index) {
@@ -274,7 +376,6 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 			oldElt = this.getBody().querySelectorAll('#tr_' + oldIndex).item(0);
 			elt = this.getBody().querySelectorAll('#tr_' + index).item(0);
 			this.indexSelected = index;
-
 
 			if (elt) {
 				if (oldElt) {
@@ -294,14 +395,16 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 			tbody = document.createElement('tbody');
 			tbody.className = 'waf-ui-body';
 			tbody.addEventListener('click', this.selectLine.bind(this), false);
+			tbody.addEventListener('dblclick', this.handleDblclick.bind(this), false);
 			f.appendChild(tbody);
 		},
 
 
 		renderElement: function(line, pos) {
-			var value, ln, col, className;
+			var value, ln, col, className, attr;
 			className = '';
 			col = this.cols();
+			
 			if (pos === this.indexSelected) {
 				className = 'class="selected"';
 			}
@@ -310,7 +413,8 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 			for (var i = 0; i < col.length; i++) {
 				value = line[col[i].attribute];
-				ln += '<td>' + value + '</td>';
+				attr = 'data-attribute="' + col[i].attribute + '"';
+				ln += '<td ' + attr + '>' + value + '</td>';
 			}
 
 			ln += '</tr>';
@@ -413,7 +517,15 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 
 		selectLine: function(e) {
-			var parent = e.target.parentElement;
+			var parent, elt;
+			elt = e.target;
+			
+			if (elt.tagName === 'SPAN') {
+				parent = elt.parentElement.parentElement;
+			} else {
+				parent = elt.parentElement;
+			}
+			
 			var id = parent.id;
 			id = id.replace('tr_', '');
 			if (id) {

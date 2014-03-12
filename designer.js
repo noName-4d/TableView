@@ -23,4 +23,8 @@
 	tableView.customizeProperty('pageSize', {
 		sourceDisplay: false
 	});
+	
+	tableView.customizeProperty('editMode', {
+		sourceDisplay: false
+	});
 });

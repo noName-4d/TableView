@@ -42,6 +42,11 @@
   padding: 14px;
   text-align: center;
   border-width: 1px;
+  -moz-user-select: -moz-none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -o-user-select: none;
+  user-select: none;
 }
 
 
