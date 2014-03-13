@@ -41,7 +41,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 		}),
 		
 		
-		editMode: widget.property({
+		simpleEditMode: widget.property({
 			type: 'boolean',
 			defaultValue: false
 		}),
@@ -170,6 +170,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 			if (this.rows()) {
 				this.rows().subscribe('currentElementChange', function(e) {
+					debugger;
 					var pos = e.data.dataSource.getPosition();
 					this.select(pos);
 				}.bind(this));
@@ -286,7 +287,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 		handleDblclick: function(ev) {
 			var that, target, tr, attribute, txt, td;
 			
-			if (this.editMode() === false) {
+			if (this.simpleEditMode() === false) {
 				return false;
 			}
 			

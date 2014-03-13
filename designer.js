@@ -24,7 +24,7 @@
 		sourceDisplay: false
 	});
 	
-	tableView.customizeProperty('editMode', {
+	tableView.customizeProperty('simpleEditMode', {
 		sourceDisplay: false
 	});
 });
