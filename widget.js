@@ -170,7 +170,6 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 			if (this.rows()) {
 				this.rows().subscribe('currentElementChange', function(e) {
-					debugger;
 					var pos = e.data.dataSource.getPosition();
 					this.select(pos);
 				}.bind(this));
