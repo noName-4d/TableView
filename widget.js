@@ -435,12 +435,24 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 
 		removeLoader: function() {
+			var that = this;
 			if (this._loader) {
 				this.getBody().removeChild(this._loader);
 				this._loader = null;
 			}
+			
+			setTimeout(function(){
+				var borderTop, borderBot, tabSize;
+				
+				borderTop = parseFloat(window.getComputedStyle(that.node).getPropertyValue('border-top-width').replace('px', ''));
+				borderBot = parseFloat(window.getComputedStyle(that.node).getPropertyValue('border-bottom-width').replace('px', ''));
+				tabSize = parseFloat(window.getComputedStyle(that.node.firstChild).getPropertyValue('height').replace('px', ''));
+				
+				that.node.style.height = (tabSize + borderTop + borderBot) + 'px';
+				
+			}, 0);
 		},
-
+				
 
 		appendLoader: function() {
 			var tr, colNumber, td, div;
