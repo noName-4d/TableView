@@ -27,4 +27,10 @@
 	tableView.customizeProperty('simpleEditMode', {
 		sourceDisplay: false
 	});
+	
+	tableView.removeEvent('insert');
+	tableView.removeEvent('change');
+	tableView.removeEvent('remove');
+	tableView.removeEvent('modify');
+	tableView.removeEvent('move');
 });

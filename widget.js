@@ -422,6 +422,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 		},
 
 
+
 		buildFooter: function() {
 			var tfoot, f = this._getFragment();
 			tfoot = document.createElement('tfoot');
@@ -441,7 +442,7 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 				this._loader = null;
 			}
 			
-			setTimeout(function(){
+			setTimeout(function() {
 				var borderTop, borderBot, tabSize;
 				
 				borderTop = parseFloat(window.getComputedStyle(that.node).getPropertyValue('border-top-width').replace('px', ''));
