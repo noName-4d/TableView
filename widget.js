@@ -595,7 +595,10 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 					navigationType = this.navigationMode();
 					pos = e.data.dataSource.getPosition();
-
+					if (pos === -1) {
+						return false;
+					}
+					
 					start = this.start();
 					pageSize = this.pageSize();
 
