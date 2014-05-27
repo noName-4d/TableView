@@ -139,7 +139,10 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 				
 				sourceProperty = this.getNavigationSource();
 				source = sourceProperty();
-
+				if (!source) {
+					return false;
+				}
+				
 				if (val < oldVal) {
 					length = val;
 					start = this.start();
