@@ -390,12 +390,15 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 
 		buildBody: function() {
 			var f, tbody;
-
+			var hOption = {};
 			f = this._getFragment();
 			tbody = document.createElement('tbody');
 			tbody.className = 'waf-ui-body';
 			tbody.addEventListener('click', this.selectLine.bind(this), false);
 			tbody.addEventListener('dblclick', this.handleDblclick.bind(this), false);
+			$(tbody)
+			  .hammer(hOption)
+			  .on("hold", this.handleDblclick.bind(this));
 			f.appendChild(tbody);
 		},
 
