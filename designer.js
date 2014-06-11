@@ -21,11 +21,17 @@
 	});
 	
 	tableView.customizeProperty('pageSize', {
+		title: 'Page size',
 		sourceDisplay: false
 	});
 	
 	tableView.customizeProperty('simpleEditMode', {
+                title: 'Simple edit mode',
 		sourceDisplay: false
+	});
+	
+	tableView.customizeProperty('cols', {
+		title: 'Columns'
 	});
 	
 	tableView.removeEvent('insert');
