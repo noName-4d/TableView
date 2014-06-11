@@ -3,14 +3,15 @@ WAF.define('TableView', ['waf-core/widget'], function(widget, navigation) {
 	var TableView = widget.create('TableView', undefined, {
 		tagName: 'div',
 		
+		rows: widget.property({
+			type: 'datasource'
+		}),
+		
 		cols: widget.property({
 			type: 'list',
 			attributes: ['label', 'attribute']
 		}),
 		
-		rows: widget.property({
-			type: 'datasource'
-		}),
 		
 		start: widget.property({
 			defaultValue: 0,
